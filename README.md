@@ -1,93 +1,167 @@
-# Legal_Lens
+# ⚖️ LegalLens
 
+**AI-powered legal document analyzer for India — now multilingual.**
+Upload any contract, agreement, or Terms of Service — LegalLens finds hidden clauses, checks against 73 Indian laws, and tells you exactly what you're agreeing to in plain language.
 
+> Built for everyday Indians who shouldn't need a lawyer to understand what they're signing.
 
-## Getting started
+---
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## What it does
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- 🔍 **Hidden clause detection** — finds buried terms that could hurt you
+- ⚖️ **Indian law cross-reference** — checks against 73 laws across 11 categories
+- 📊 **Risk scoring** — rates the document and each clause (Low → Critical)
+- 🔮 **Future implications** — what signing means for you in 1 month, 1 year, long-term
+- 💬 **Plain language** — no legal jargon, explained like a friend
+- 🤝 **Negotiation tips** — how to push back on unfair terms
+- 🤖 **Legal assistant chatbot** — ask questions about your legal situation in plain language
+- 🌐 **Multilingual** — full UI and law descriptions in English, हिन्दी, and తెలుగు
 
-## Add your files
+---
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## Supported Documents
+
+Employment Contracts · Rental Agreements · Loan Agreements · Terms of Service ·
+Privacy Policies · NDAs · Builder-Buyer Agreements · Freelance Contracts · Insurance Policies · Partnership Deeds · Franchise Agreements · Investment Agreements
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Backend | Python 3.11 + FastAPI |
+| Frontend | React 18 + Vite |
+| AI | Gemini 2.5 Flash |
+| PDF parsing | pdfplumber |
+| DOCX parsing | python-docx |
+| i18n | React Context (LangContext) + translations.js |
+| Deploy | GitLab Pages (frontend) |
+
+---
+
+## Local Setup
+
+### 1. Get a free Gemini API key
+Go to [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) → Create API Key
+
+### 2. Backend
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+# Edit .env → paste your GEMINI_API_KEY
+uvicorn main:app --reload
+```
+
+### 3. Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173)
+
+Or use the setup script:
+```bash
+bash .specify/scripts/bash/setup.sh
+bash .specify/scripts/bash/dev.sh
+```
+
+> **Note:** The `.env` file lives in the project root (`legallens/.env`) and also needs to be present in `legallens/backend/.env`. Keep both in sync.
+
+---
+
+## Project Structure
 
 ```
-cd existing_repo
-git remote add origin https://code.swecha.org/Amitesh02/legal_lens.git
-git branch -M main
-git push -uf origin main
+legallens/
+├── backend/                      # FastAPI backend
+│   ├── main.py                   # App entry, CORS, router registration
+│   ├── routes/
+│   │   ├── analyze.py            # POST /analyze — document analysis
+│   │   └── chat.py               # POST /chat — legal assistant chatbot
+│   ├── services/
+│   │   ├── gemini_service.py     # Gemini 2.5 Flash — document analysis
+│   │   ├── chat_service.py       # Gemini 2.5 Flash — conversational chat
+│   │   ├── file_processor.py     # PDF / DOCX / TXT extraction
+│   │   └── ocr.py                # OCR for scanned PDFs
+│   ├── requirements.txt
+│   └── .env                      # GEMINI_API_KEY (keep in sync with root .env)
+├── frontend/                     # React + Vite frontend
+│   └── src/
+│       ├── pages/
+│       │   ├── Home.jsx          # Upload + analyze flow
+│       │   ├── Results.jsx       # Analysis results display
+│       │   └── Laws.jsx          # Indian laws reference (multilingual)
+│       ├── components/
+│       │   ├── Navbar.jsx        # Top nav with language switcher
+│       │   └── ChatBot.jsx       # Floating legal assistant chatbot
+│       ├── context/
+│       │   └── LangContext.jsx   # Global language state (en / hi / te)
+│       └── lib/
+│           ├── translations.js   # UI strings for en / hi / te
+│           └── lawsData.js       # 73 laws with multilingual descriptions
+├── .specify/                     # Spec-kit config
+│   ├── memory/constitution.md    # Project principles and coding standards
+│   └── scripts/bash/             # setup.sh, dev.sh
+├── .env                          # GEMINI_API_KEY (root — source of truth)
+├── .gitlab-ci.yml                # CI/CD — auto-deploys frontend to GitLab Pages
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+└── README.md
 ```
 
-## Integrate with your tools
+---
 
-- [ ] [Set up project integrations](https://code.swecha.org/Amitesh02/legal_lens/-/settings/integrations)
+## Multilingual Architecture
 
-## Collaborate with your team
+Language state is managed globally via `LangContext` (`en` / `hi` / `te`).
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+- **UI strings** — all labels, buttons, and messages live in `src/lib/translations.js`, keyed by language
+- **Law descriptions** — `src/lib/lawsData.js` stores `short`, `governs`, `watchFor`, and `penalty` as `{ en, hi, te }` objects. Law names and section titles stay in English (standard Indian legal practice)
+- **Chatbot** — automatically detects the user's message language and responds in the same language via Gemini's instruction
+- **Language switcher** — in the Navbar; switching updates the entire UI instantly
 
-## Test and Deploy
+---
 
-Use the built-in continuous integration in GitLab.
+## Indian Laws Coverage
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+73 laws across 11 categories:
 
-***
+| Category | Notable Laws |
+|----------|------|
+| Financial & Banking | RBI Act, Banking Regulation Act, SEBI Act, FEMA, IBC, SARFAESI, PMLA, NI Act |
+| Contract & Civil | Indian Contract Act 1872, Arbitration & Conciliation Act, Limitation Act |
+| Property & Real Estate | RERA 2016, Transfer of Property Act, Registration Act |
+| Employment & Labour | Code on Wages, Maternity Benefit Act, POSH Act, Minimum Wages Act |
+| Consumer Protection | Consumer Protection Act 2019, FSSAI Act |
+| Digital & Data Privacy | DPDPA 2023, IT Act 2000 |
+| Criminal Law | BNS 2023, Prevention of Corruption Act |
+| Business & IP | Patents Act, Copyright Act, Competition Act |
+| Environment | Environment Protection Act |
 
-# Editing this README
+---
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+## API Endpoints
 
-## Suggestions for a good README
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/analyze` | Analyze an uploaded document (PDF/DOCX/TXT) |
+| POST | `/chat` | Legal assistant chat (conversation history) |
+| GET | `/` | Health check |
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+---
 
-## Name
-Choose a self-explaining name for your project.
+## Disclaimer
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+LegalLens is an informational tool. It is **not a substitute for professional legal advice**. For important documents, always consult a qualified advocate.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+---
 
 ## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Please read the [project constitution](.specify/memory/constitution.md) first.
