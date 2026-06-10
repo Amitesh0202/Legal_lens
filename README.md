@@ -165,7 +165,3 @@ LegalLens is an informational tool. It is **not a substitute for professional le
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Please read the [project constitution](.specify/memory/constitution.md) first.
-
-## License
-
-[MIT](LICENSE) © 2026 LegalLens Contributors
