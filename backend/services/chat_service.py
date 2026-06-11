@@ -1,6 +1,10 @@
 import os
+import logging
 from typing import List
 import google.generativeai as genai
+from services import ollama_service
+
+logger = logging.getLogger(__name__)
 
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
@@ -26,20 +30,25 @@ You are NOT a substitute for a licensed advocate. Always recommend consulting on
 
 
 async def get_chat_reply(messages: list) -> str:
-    model = genai.GenerativeModel(
-        model_name=MODEL,
-        system_instruction=SYSTEM_PROMPT
-    )
+    try:
+        model = genai.GenerativeModel(
+            model_name=MODEL,
+            system_instruction=SYSTEM_PROMPT
+        )
 
-    # Build conversation history for Gemini (all but the last message)
-    history = []
-    for msg in messages[:-1]:
-        role = "user" if msg["role"] == "user" else "model"
-        history.append({"role": role, "parts": [msg["content"]]})
+        # Build conversation history for Gemini (all but the last message)
+        history = []
+        for msg in messages[:-1]:
+            role = "user" if msg["role"] == "user" else "model"
+            history.append({"role": role, "parts": [msg["content"]]})
 
-    # Last message is the new user input
-    last_message = messages[-1]["content"]
+        # Last message is the new user input
+        last_message = messages[-1]["content"]
 
-    chat = model.start_chat(history=history)
-    response = await chat.send_message_async(last_message)
-    return response.text
+        chat = model.start_chat(history=history)
+        response = await chat.send_message_async(last_message)
+        return response.text
+
+    except Exception as gemini_error:
+        logger.warning(f"Gemini chat failed ({gemini_error}), falling back to Ollama...")
+        return await ollama_service.get_chat_reply(messages)
