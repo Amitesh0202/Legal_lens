@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Environment — never bake secrets into image
+.env
+backend/.env
+
+# Frontend — not part of backend image
+frontend/
+frontend/node_modules/
+frontend/dist/
+
+# Dev/test artifacts
+.coverage
+htmlcov/
+.pytest_cache/
+*.log
+
+# Spec / docs — not needed at runtime
+specs/
+.specify/
+*.md
