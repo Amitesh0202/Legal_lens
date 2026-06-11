@@ -43,7 +43,11 @@ You must return ONLY valid JSON — no markdown, no explanation, no code blocks.
 
 Focus on Indian law. Flag anything unusual, one-sided, or potentially harmful. Be thorough but use plain language."""
 
-CHAT_SYSTEM_PROMPT = """You are LegalLens Assistant, a helpful legal guide specializing in Indian law.
+LANG_NAMES = {"en": "English", "hi": "Hindi", "te": "Telugu"}
+
+def build_chat_system_prompt(lang: str) -> str:
+    lang_name = LANG_NAMES.get(lang, "English")
+    return f"""You are LegalLens Assistant, a helpful legal guide specializing in Indian law.
 
 Your role:
 - Help users understand their legal rights and obligations in India
@@ -53,7 +57,7 @@ Your role:
 - Be empathetic — many users are dealing with stressful legal situations
 
 Rules:
-- Always respond in the same language the user writes in (Hindi, Telugu, or English)
+- ALWAYS respond in {lang_name}, regardless of what language the user writes in. This is mandatory.
 - Never give advice that could harm the user
 - Always add a disclaimer when giving specific legal advice
 - Keep responses concise and actionable
@@ -116,8 +120,8 @@ Analyze this document thoroughly and return the JSON response."""
         }
 
 
-async def get_chat_reply(messages: list) -> str:
-    ollama_messages = [{"role": "system", "content": CHAT_SYSTEM_PROMPT}]
+async def get_chat_reply(messages: list, lang: str = "en") -> str:
+    ollama_messages = [{"role": "system", "content": build_chat_system_prompt(lang)}]
     for msg in messages:
         role = "user" if msg["role"] == "user" else "assistant"
         ollama_messages.append({"role": role, "content": msg["content"]})
