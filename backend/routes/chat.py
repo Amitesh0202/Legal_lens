@@ -13,6 +13,7 @@ class Message(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: List[Message]
+    lang: str = "en"
 
 
 @router.post("/chat")
@@ -20,5 +21,5 @@ async def chat(request: ChatRequest):
     if not request.messages:
         raise HTTPException(status_code=400, detail="No messages provided.")
 
-    reply = await get_chat_reply([m.model_dump() for m in request.messages])
+    reply = await get_chat_reply([m.model_dump() for m in request.messages], lang=request.lang)
     return {"reply": reply}
