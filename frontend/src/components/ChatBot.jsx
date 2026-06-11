@@ -12,7 +12,7 @@ function TypingDots() {
 }
 
 export default function ChatBot() {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const tc = t.chat
 
   const [open, setOpen] = useState(false)
@@ -52,7 +52,7 @@ export default function ChatBot() {
       const res = await fetch(API.chat, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: newMessages }),
+        body: JSON.stringify({ messages: newMessages, lang }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.detail || 'Chat failed')
