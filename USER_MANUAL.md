@@ -17,7 +17,7 @@ LegalLens is a free AI-powered tool that helps you understand legal documents be
 
 ### Step 2: Click "Analyze Document"
 - LegalLens will extract the text and send it to AI for analysis
-- This takes **5–15 seconds** depending on document length
+- This takes **5–15 seconds** with Gemini, or **15–60 seconds** if Ollama is handling the request (see [AI Fallback](#ai-fallback) below)
 
 ### Step 3: Read your results
 
@@ -70,10 +70,24 @@ LegalLens works best with:
 
 ---
 
+## AI Fallback
+
+LegalLens uses **Google Gemini 2.5 Flash** as its primary AI engine. If Gemini is temporarily unavailable (due to quota limits, a network issue, or no API key being configured), the system automatically falls back to **Ollama** — a local, self-hosted AI model — without any action needed from you.
+
+When Ollama is handling your request:
+- Analysis may take slightly longer (15–60 seconds instead of 5–15)
+- Quality is comparable for most document types; very complex legal structures may be less detailed
+- The fallback is fully transparent — you will not see an error message
+
+**For self-hosted deployments:** install [Ollama](https://ollama.com/download), run `ollama pull llama3.2`, and set `OLLAMA_BASE_URL` in your `.env` file.
+
+---
+
 ## Privacy
 
 - Your document is **never stored**. It is analyzed in-memory and immediately discarded.
-- Document text is sent to Google Gemini API for analysis. See Google's [AI data policies](https://ai.google.dev/gemini-api/terms).
+- When Gemini is active: document text is sent to Google Gemini API. See Google's [AI data policies](https://ai.google.dev/gemini-api/terms).
+- When Ollama is active: analysis runs entirely on your own machine or server — no data leaves your infrastructure.
 - We recommend **not uploading** documents containing Aadhaar numbers, PAN, bank account details, or other sensitive personal identifiers.
 
 ---
@@ -100,3 +114,9 @@ See the Privacy section above. Avoid uploading documents with Aadhaar, PAN, or f
 
 **Why does it say "could not extract text"?**
 Your PDF is likely a scanned image. Try using a digitally-created PDF, or retype the key clauses into the text box instead.
+
+**Why is my analysis taking longer than usual?**
+Gemini may be temporarily unavailable and the system has fallen back to Ollama. This is normal — your analysis will complete, just a bit slower. No action is needed on your part.
+
+**Can I use LegalLens without a Gemini API key?**
+Yes. If no Gemini key is configured, all requests automatically use Ollama. You need Ollama installed and running locally (or point `OLLAMA_BASE_URL` to a remote instance).
