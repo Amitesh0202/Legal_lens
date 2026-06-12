@@ -1,0 +1,39 @@
+stages:
+  - security
+  - audit
+  - changelog
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+cache:
+  paths:
+    - .cache/pip
+
+secret-scanning:
+  stage: security
+  image: zricethezav/gitleaks:latest
+  script:
+    - gitleaks detect --source . --verbose
+  allow_failure: false
+
+dependency-audit:
+  stage: audit
+  image: python:3.11-slim
+  before_script:
+    - pip install pip-audit --quiet
+  script:
+    - pip-audit --requirement backend/requirements.txt
+  allow_failure: false
+
+changelog:
+  stage: changelog
+  image: orhunp/git-cliff:latest
+  script:
+    - git-cliff --output CHANGELOG.md
+  artifacts:
+    paths:
+      - CHANGELOG.md
+  only:
+    - main
+  allow_failure: true
