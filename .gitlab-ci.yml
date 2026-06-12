@@ -1,14 +1,23 @@
 stages:
   - security
+  - lint
+  - format
+  - type_check
+  - test
+  - coverage
   - audit
   - changelog
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  NODE_VERSION: "18"
 
 cache:
   paths:
     - .cache/pip
+    - frontend/node_modules/
+
+# ── Security ────────────────────────────────────────────────────────────────
 
 secret-scanning:
   stage: security
@@ -17,7 +26,98 @@ secret-scanning:
     - gitleaks detect --source . --verbose
   allow_failure: false
 
-dependency-audit:
+# ── Lint ────────────────────────────────────────────────────────────────────
+
+lint-python:
+  stage: lint
+  image: python:3.11-slim
+  before_script:
+    - pip install ruff bandit --quiet
+  script:
+    - ruff check backend --config pyproject.toml
+    - bandit -c pyproject.toml -r backend -ll
+  allow_failure: false
+
+lint-js:
+  stage: lint
+  image: node:18-alpine
+  before_script:
+    - cd frontend && npm ci --silent
+  script:
+    - cd frontend && npx eslint src --ext .js,.jsx
+  allow_failure: false
+
+# ── Format ──────────────────────────────────────────────────────────────────
+
+format-python:
+  stage: format
+  image: python:3.11-slim
+  before_script:
+    - pip install ruff --quiet
+  script:
+    - ruff format backend --check --config pyproject.toml
+  allow_failure: false
+
+format-js:
+  stage: format
+  image: node:18-alpine
+  before_script:
+    - cd frontend && npm ci --silent
+  script:
+    - cd frontend && npx prettier --check "src/**/*.{js,jsx,css}"
+  allow_failure: false
+
+# ── Type Check ──────────────────────────────────────────────────────────────
+
+type-check-python:
+  stage: type_check
+  image: python:3.11-slim
+  before_script:
+    - pip install mypy --quiet
+    - pip install -r backend/requirements.txt --quiet
+  script:
+    - mypy backend --config-file pyproject.toml
+  allow_failure: false
+
+# ── Test ────────────────────────────────────────────────────────────────────
+
+test-python:
+  stage: test
+  image: python:3.11-slim
+  before_script:
+    - pip install -r backend/requirements.txt --quiet
+    - pip install pytest pytest-cov pytest-asyncio --quiet
+  script:
+    - pytest backend/tests --cov=backend --cov-report=term-missing --cov-config=pyproject.toml
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+  allow_failure: false
+
+# ── Coverage ─────────────────────────────────────────────────────────────────
+
+coverage-report:
+  stage: coverage
+  image: python:3.11-slim
+  before_script:
+    - pip install -r backend/requirements.txt --quiet
+    - pip install pytest pytest-cov pytest-asyncio --quiet
+  script:
+    - pytest backend/tests --cov=backend --cov-report=xml --cov-report=html --cov-fail-under=60
+  artifacts:
+    paths:
+      - htmlcov/
+      - coverage.xml
+    expire_in: 7 days
+  only:
+    - main
+  allow_failure: false
+
+# ── Audit ───────────────────────────────────────────────────────────────────
+
+dependency-audit-python:
   stage: audit
   image: python:3.11-slim
   before_script:
@@ -25,6 +125,17 @@ dependency-audit:
   script:
     - pip-audit --requirement backend/requirements.txt
   allow_failure: false
+
+dependency-audit-js:
+  stage: audit
+  image: node:18-alpine
+  before_script:
+    - cd frontend && npm ci --silent
+  script:
+    - cd frontend && npm audit --audit-level=high
+  allow_failure: true
+
+# ── Changelog ───────────────────────────────────────────────────────────────
 
 changelog:
   stage: changelog
