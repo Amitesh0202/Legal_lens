@@ -1,13 +1,20 @@
 # ⚖️ LegalLens
 
 **AI-powered legal document analyzer for India — now multilingual.**
-Upload any contract, agreement, or Terms of Service — LegalLens finds hidden clauses, checks against 73 Indian laws, and tells you exactly what you're agreeing to in plain language.
 
 > Built for everyday Indians who shouldn't need a lawyer to understand what they're signing.
+
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?logo=vercel)](https://legal-lens-ten.vercel.app)
+[![Backend](https://img.shields.io/badge/Backend-Render-46E3B7?logo=render)](https://render.com)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](LICENSE)
+[![Python 3.11](https://img.shields.io/badge/Python-3.11-blue?logo=python)](https://python.org)
+[![React 18](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://react.dev)
 
 ---
 
 ## What it does
+
+Upload any contract, agreement, or Terms of Service — LegalLens finds hidden clauses, checks against 73 Indian laws, and tells you exactly what you're agreeing to in plain language.
 
 - 🔍 **Hidden clause detection** — finds buried terms that could hurt you
 - ⚖️ **Indian law cross-reference** — checks against 73 laws across 11 categories
@@ -16,14 +23,13 @@ Upload any contract, agreement, or Terms of Service — LegalLens finds hidden c
 - 💬 **Plain language** — no legal jargon, explained like a friend
 - 🤝 **Negotiation tips** — how to push back on unfair terms
 - 🤖 **Legal assistant chatbot** — ask questions about your legal situation in plain language
-- 🌐 **Multilingual** — full UI and law descriptions in English, हिन्दी, and తెలుగు
+- 🌐 **Multilingual** — full UI and analysis in English, हिन्दी, and తెలుగు
 
 ---
 
 ## Supported Documents
 
-Employment Contracts · Rental Agreements · Loan Agreements · Terms of Service ·
-Privacy Policies · NDAs · Builder-Buyer Agreements · Freelance Contracts · Insurance Policies · Partnership Deeds · Franchise Agreements · Investment Agreements
+Employment Contracts · Rental Agreements · Loan Agreements · Terms of Service · Privacy Policies · NDAs · Builder-Buyer Agreements · Freelance Contracts · Insurance Policies · Partnership Deeds · Franchise Agreements · Investment Agreements
 
 ---
 
@@ -35,115 +41,157 @@ Privacy Policies · NDAs · Builder-Buyer Agreements · Freelance Contracts · I
 | Frontend | React 18 + Vite |
 | AI (primary) | Gemini 2.5 Flash |
 | AI (fallback) | Ollama (llama3.2 by default) |
-| PDF parsing | pdfplumber |
+| PDF parsing | PyMuPDF |
 | DOCX parsing | python-docx |
-| i18n | React Context (LangContext) + translations.js |
-| Deploy | GitLab Pages (frontend) |
+| i18n | React Context + translations.js |
+| Deploy | Vercel (frontend) + Render (backend) |
 
 ---
 
-## Local Setup
+## Installation
 
-### 1. Get a free Gemini API key
-Go to [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) → Create API Key
+### Prerequisites
 
-### 2. Backend
+- Python 3.11+
+- Node.js 18+
+- A free [Gemini API key](https://aistudio.google.com/app/apikey) *(or Ollama for fully local use)*
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/Amitesh0202/Legal_lens.git
+cd Legal_lens
+```
+
+### 2. Backend setup
+
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+
+# Activate the virtual environment
+source venv/bin/activate        # macOS/Linux
+venv\Scripts\activate           # Windows
+
 pip install -r requirements.txt
-# Edit .env → paste your GEMINI_API_KEY
-uvicorn main:app --reload
+
+# Create your .env file
+cp ../.env.example .env
+# Open .env and paste your GEMINI_API_KEY
 ```
 
-### (Optional) Ollama fallback
-
-If Gemini is unavailable (quota exceeded, network issue, no API key), LegalLens automatically falls back to a locally running Ollama model.
+### 3. Frontend setup
 
 ```bash
-# Install Ollama: https://ollama.com/download
-ollama pull llama3.2     # or mistral, gemma3, etc.
-ollama serve             # starts the Ollama server at http://localhost:11434
+cd frontend
+npm install
 ```
 
-Set in `backend/.env` (defaults shown — only needed to override):
+### 4. Ollama (optional — local AI fallback)
+
+If Gemini is unavailable or you prefer fully local inference:
+
+```bash
+# Install from https://ollama.com/download, then:
+ollama pull llama3.2
+ollama serve
+```
+
+Add to `backend/.env`:
 ```
 OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.2
 ```
 
-No Gemini key? Just leave `GEMINI_API_KEY` blank and ensure Ollama is running — every request will use Ollama automatically.
+No Gemini key? Leave `GEMINI_API_KEY` blank — LegalLens will use Ollama automatically.
 
-### 3. Frontend
+---
+
+## Usage
+
+### Run locally
+
+**Terminal 1 — Backend:**
 ```bash
-cd frontend
-npm install
-npm run dev
+cd backend
+source venv/bin/activate   # or venv\Scripts\activate on Windows
+uvicorn main:app --reload
+# API running at http://localhost:8000
 ```
 
-Open [http://localhost:5173](http://localhost:5173)
-
-Or use the setup script:
+**Terminal 2 — Frontend:**
 ```bash
-bash .specify/scripts/bash/setup.sh
+cd frontend
+npm run dev
+# App running at http://localhost:5173
+```
+
+Or use the convenience script:
+```bash
 bash .specify/scripts/bash/dev.sh
 ```
 
-> **Note:** The `.env` file lives in the project root (`legallens/.env`) and also needs to be present in `legallens/backend/.env`. Keep both in sync.
+### Analyze a document
 
----
+1. Open [http://localhost:5173](http://localhost:5173)
+2. Drag and drop a PDF, DOCX, or TXT file (up to 10MB)
+3. Click **Analyze Document**
+4. Review the results — risk score, hidden clauses, law references, negotiation tips
+5. Use the **chatbot** to ask follow-up questions in English, Hindi, or Telugu
 
-## Project Structure
+### Developer commands (Makefile)
 
-```
-legallens/
-├── backend/                      # FastAPI backend
-│   ├── main.py                   # App entry, CORS, router registration
-│   ├── routes/
-│   │   ├── analyze.py            # POST /analyze — document analysis
-│   │   └── chat.py               # POST /chat — legal assistant chatbot
-│   ├── services/
-│   │   ├── gemini_service.py     # Gemini 2.5 Flash — document analysis
-│   │   ├── chat_service.py       # Gemini 2.5 Flash — conversational chat
-│   │   ├── file_processor.py     # PDF / DOCX / TXT extraction
-│   │   └── ocr.py                # OCR for scanned PDFs
-│   ├── requirements.txt
-│   └── .env                      # GEMINI_API_KEY (keep in sync with root .env)
-├── frontend/                     # React + Vite frontend
-│   └── src/
-│       ├── pages/
-│       │   ├── Home.jsx          # Upload + analyze flow
-│       │   ├── Results.jsx       # Analysis results display
-│       │   └── Laws.jsx          # Indian laws reference (multilingual)
-│       ├── components/
-│       │   ├── Navbar.jsx        # Top nav with language switcher
-│       │   └── ChatBot.jsx       # Floating legal assistant chatbot
-│       ├── context/
-│       │   └── LangContext.jsx   # Global language state (en / hi / te)
-│       └── lib/
-│           ├── translations.js   # UI strings for en / hi / te
-│           └── lawsData.js       # 73 laws with multilingual descriptions
-├── .specify/                     # Spec-kit config
-│   ├── memory/constitution.md    # Project principles and coding standards
-│   └── scripts/bash/             # setup.sh, dev.sh
-├── .env                          # GEMINI_API_KEY (root — source of truth)
-├── .gitlab-ci.yml                # CI/CD — auto-deploys frontend to GitLab Pages
-├── CHANGELOG.md
-├── CONTRIBUTING.md
-└── README.md
+```bash
+make install      # Install all dependencies
+make lint-py      # Lint backend (ruff + bandit)
+make lint-js      # Lint frontend (eslint)
+make format-py    # Format backend (ruff)
+make format-js    # Format frontend (prettier)
+make audit        # pip-audit + npm audit
+make test         # Run pytest with coverage
+make qa           # Run all checks
+make dev          # Start backend + frontend
 ```
 
 ---
 
-## Multilingual Architecture
+## API Reference
 
-Language state is managed globally via `LangContext` (`en` / `hi` / `te`).
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/analyze` | Analyze an uploaded document (PDF/DOCX/TXT) |
+| `POST` | `/api/chat` | Legal assistant chat |
+| `GET` | `/` | Health check |
 
-- **UI strings** — all labels, buttons, and messages live in `src/lib/translations.js`, keyed by language
-- **Law descriptions** — `src/lib/lawsData.js` stores `short`, `governs`, `watchFor`, and `penalty` as `{ en, hi, te }` objects. Law names and section titles stay in English (standard Indian legal practice)
-- **Chatbot** — automatically detects the user's message language and responds in the same language via Gemini's instruction
-- **Language switcher** — in the Navbar; switching updates the entire UI instantly
+### `POST /api/analyze`
+
+```bash
+curl -X POST https://your-backend.onrender.com/api/analyze \
+  -F "file=@contract.pdf" \
+  -F "document_name=My Contract"
+```
+
+Response includes `ai_provider: "gemini" | "ollama"` so you know which model handled it.
+
+### `POST /api/chat`
+
+```json
+{
+  "messages": [{"role": "user", "content": "What is RERA?"}],
+  "lang": "en"
+}
+```
+
+---
+
+## AI Provider Fallback
+
+LegalLens uses a two-tier AI strategy for resilience:
+
+1. **Gemini 2.5 Flash** (primary) — fast, JSON-native, optimized for structured legal analysis
+2. **Ollama** (fallback) — kicks in automatically if Gemini fails for any reason
+
+The switch is seamless — no errors, no restarts, no config changes needed at runtime.
 
 ---
 
@@ -152,11 +200,11 @@ Language state is managed globally via `LangContext` (`en` / `hi` / `te`).
 73 laws across 11 categories:
 
 | Category | Notable Laws |
-|----------|------|
-| Financial & Banking | RBI Act, Banking Regulation Act, SEBI Act, FEMA, IBC, SARFAESI, PMLA, NI Act |
-| Contract & Civil | Indian Contract Act 1872, Arbitration & Conciliation Act, Limitation Act |
+|----------|-------------|
+| Financial & Banking | RBI Act, SEBI Act, FEMA, IBC, SARFAESI, PMLA, NI Act |
+| Contract & Civil | Indian Contract Act 1872, Arbitration & Conciliation Act |
 | Property & Real Estate | RERA 2016, Transfer of Property Act, Registration Act |
-| Employment & Labour | Code on Wages, Maternity Benefit Act, POSH Act, Minimum Wages Act |
+| Employment & Labour | Code on Wages, Maternity Benefit Act, POSH Act |
 | Consumer Protection | Consumer Protection Act 2019, FSSAI Act |
 | Digital & Data Privacy | DPDPA 2023, IT Act 2000 |
 | Criminal Law | BNS 2023, Prevention of Corruption Act |
@@ -165,24 +213,61 @@ Language state is managed globally via `LangContext` (`en` / `hi` / `te`).
 
 ---
 
-## AI Provider Fallback
+## Project Structure
 
-LegalLens uses a two-tier AI strategy:
-
-1. **Gemini 2.5 Flash** (primary) — fast, JSON-native, optimized for structured legal analysis
-2. **Ollama** (fallback) — local/self-hosted, kicks in automatically if Gemini fails for any reason
-
-All responses include an `ai_provider` field (`"gemini"` or `"ollama"`) so you can tell which model handled the request. No code changes or restarts are needed — the fallback is seamless.
+```
+Legal_lens/
+├── backend/                      # FastAPI backend
+│   ├── main.py                   # App entry, CORS, router registration
+│   ├── routes/
+│   │   ├── analyze.py            # POST /api/analyze
+│   │   └── chat.py               # POST /api/chat
+│   ├── services/
+│   │   ├── gemini_service.py     # Gemini 2.5 Flash (primary AI)
+│   │   ├── ollama_service.py     # Ollama (fallback AI)
+│   │   ├── chat_service.py       # Chatbot logic with lang support
+│   │   ├── file_processor.py     # PDF / DOCX / TXT extraction
+│   │   └── ocr.py                # OCR for scanned PDFs
+│   └── requirements.txt
+├── frontend/                     # React + Vite frontend
+│   └── src/
+│       ├── pages/
+│       │   ├── Home.jsx          # Upload + analyze flow
+│       │   ├── Results.jsx       # Analysis results display
+│       │   └── Laws.jsx          # Indian laws reference
+│       ├── components/
+│       │   ├── Navbar.jsx        # Top nav with language switcher
+│       │   └── ChatBot.jsx       # Floating legal assistant chatbot
+│       ├── context/
+│       │   └── LangContext.jsx   # Global language state (en/hi/te)
+│       └── lib/
+│           ├── translations.js   # UI strings in 3 languages
+│           └── lawsData.js       # 73 laws with multilingual descriptions
+├── specs/                        # Spec-driven development docs
+│   ├── 001-legallens-core/
+│   └── 002-ollama-fallback/
+├── .env.example                  # Required environment variables
+├── Makefile                      # Developer commands
+├── Dockerfile                    # Container support
+└── .gitlab-ci.yml                # CI/CD pipeline
+```
 
 ---
 
-## API Endpoints
+## Contributing
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/analyze` | Analyze an uploaded document (PDF/DOCX/TXT) |
-| POST | `/chat` | Legal assistant chat (conversation history) |
-| GET | `/` | Health check |
+We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) and the [project constitution](.specify/memory/constitution.md) before opening a PR.
+
+**Quick start:**
+```bash
+git checkout -b feature/your-feature-name
+# make your changes
+make lint          # check code quality
+git commit -m "feat: describe your change"
+# open a Pull Request / Merge Request
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow, commit message format, and what not to contribute.
 
 ---
 
@@ -192,6 +277,6 @@ LegalLens is an informational tool. It is **not a substitute for professional le
 
 ---
 
-## Contributing
+## License
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Please read the [project constitution](.specify/memory/constitution.md) first.
+This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
