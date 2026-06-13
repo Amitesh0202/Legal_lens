@@ -1,8 +1,11 @@
-import os
 import json
-import re
 import logging
+import os
+import re
+from typing import Any
+
 import google.generativeai as genai
+
 from services import ollama_service
 
 logger = logging.getLogger(__name__)
@@ -74,11 +77,11 @@ Analyze this document thoroughly and return the JSON response."""
         raw = response.text.strip()
 
         # Strip markdown code blocks if present
-        raw = re.sub(r'^```(?:json)?\s*', '', raw)
-        raw = re.sub(r'\s*```$', '', raw)
+        raw = re.sub(r"^```(?:json)?\s*", "", raw)
+        raw = re.sub(r"\s*```$", "", raw)
 
         try:
-            result = json.loads(raw)
+            result: dict[str, Any] = json.loads(raw)
             result["ai_provider"] = "gemini"
             return result
         except json.JSONDecodeError:

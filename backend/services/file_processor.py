@@ -1,4 +1,5 @@
 import io
+from typing import Any
 
 
 def extract_text(contents: bytes, filename: str) -> str:
@@ -20,6 +21,7 @@ def extract_text(contents: bytes, filename: str) -> str:
 def _extract_pdf(contents: bytes) -> str:
     try:
         import fitz  # PyMuPDF
+
         doc = fitz.open(stream=contents, filetype="pdf")
         pages = []
         for page in doc:
@@ -34,13 +36,15 @@ def _extract_pdf(contents: bytes) -> str:
         doc.close()
         return "\n\n".join(pages)
     except Exception as e:
-        raise RuntimeError(f"PDF extraction failed: {e}")
+        raise RuntimeError(f"PDF extraction failed: {e}") from e
 
 
-def _ocr_page(page) -> str:
+def _ocr_page(page: Any) -> str:
     try:
-        from services.ocr import ocr_image
         import fitz
+
+        from services.ocr import ocr_image
+
         mat = fitz.Matrix(2, 2)  # 2× zoom for better OCR accuracy
         pix = page.get_pixmap(matrix=mat)
         img_bytes = pix.tobytes("png")
@@ -52,8 +56,9 @@ def _ocr_page(page) -> str:
 def _extract_docx(contents: bytes) -> str:
     try:
         from docx import Document
+
         doc = Document(io.BytesIO(contents))
         paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
         return "\n\n".join(paragraphs)
     except Exception as e:
-        raise RuntimeError(f"DOCX extraction failed: {e}")
+        raise RuntimeError(f"DOCX extraction failed: {e}") from e

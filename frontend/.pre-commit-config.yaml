@@ -16,19 +16,22 @@ repos:
       - id: check-added-large-files
         args: ['--maxkb=500']
 
-  # JS/JSX/CSS formatting
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.8
+# JS/JSX/CSS formatting
+  - repo: local
     hooks:
       - id: prettier
+        name: prettier
+        entry: npx --prefix frontend prettier --write
+        language: system
+        files: ^frontend/.*\.(js|jsx|css|json)$
         types_or: [javascript, jsx, css, json]
 
   # ESLint
-  - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.3.0
+  - repo: local
     hooks:
       - id: eslint
-        files: \.(js|jsx)$
+        name: eslint
+        entry: npx --prefix frontend eslint --config frontend/eslint.config.js
+        language: system
+        files: ^frontend/.*\.(js|jsx)$
         types: [file]
-        additional_dependencies:
-          - eslint@9.3.0

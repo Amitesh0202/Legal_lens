@@ -1,16 +1,16 @@
-import { Link, useLocation } from 'react-router-dom'
-import { useLang } from '../context/LangContext.jsx'
-import './Navbar.css'
+import { Link, useLocation } from "react-router-dom";
+import { useLang } from "../context/LangContext.jsx";
+import "./Navbar.css";
 
 const LANGS = [
-  { code: 'en', label: 'EN', full: 'English' },
-  { code: 'hi', label: 'हि', full: 'हिंदी' },
-  { code: 'te', label: 'తె', full: 'తెలుగు' },
-]
+  { code: "en", label: "EN", full: "English" },
+  { code: "hi", label: "हि", full: "हिंदी" },
+  { code: "te", label: "తె", full: "తెలుగు" },
+];
 
 export default function Navbar() {
-  const loc = useLocation()
-  const { lang, setLang, t } = useLang()
+  const loc = useLocation();
+  const { lang, setLang, t } = useLang();
 
   return (
     <nav className="navbar">
@@ -21,15 +21,19 @@ export default function Navbar() {
       </Link>
 
       <div className="navbar-center">
-        <Link to="/" className={loc.pathname === '/' ? 'active' : ''}>{t.nav.analyze}</Link>
-        <Link to="/laws" className={loc.pathname === '/laws' ? 'active' : ''}>{t.nav.laws}</Link>
+        <Link to="/" className={loc.pathname === "/" ? "active" : ""}>
+          {t.nav.analyze}
+        </Link>
+        <Link to="/laws" className={loc.pathname === "/laws" ? "active" : ""}>
+          {t.nav.laws}
+        </Link>
       </div>
 
       <div className="lang-switcher">
-        {LANGS.map(l => (
+        {LANGS.map((l) => (
           <button
             key={l.code}
-            className={`lang-btn ${lang === l.code ? 'active' : ''}`}
+            className={`lang-btn ${lang === l.code ? "active" : ""}`}
             onClick={() => setLang(l.code)}
             title={l.full}
           >
@@ -38,5 +42,5 @@ export default function Navbar() {
         ))}
       </div>
     </nav>
-  )
+  );
 }

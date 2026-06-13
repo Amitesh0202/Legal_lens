@@ -1,6 +1,8 @@
-import os
 import json
+import os
 import re
+from typing import Any
+
 import httpx
 
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
@@ -44,6 +46,7 @@ You must return ONLY valid JSON — no markdown, no explanation, no code blocks.
 Focus on Indian law. Flag anything unusual, one-sided, or potentially harmful. Be thorough but use plain language."""
 
 LANG_NAMES = {"en": "English", "hi": "Hindi", "te": "Telugu"}
+
 
 def build_chat_system_prompt(lang: str) -> str:
     lang_name = LANG_NAMES.get(lang, "English")
@@ -96,11 +99,11 @@ Analyze this document thoroughly and return the JSON response."""
     raw = data["message"]["content"].strip()
 
     # Strip markdown code blocks if present
-    raw = re.sub(r'^```(?:json)?\s*', '', raw)
-    raw = re.sub(r'\s*```$', '', raw)
+    raw = re.sub(r"^```(?:json)?\s*", "", raw)
+    raw = re.sub(r"\s*```$", "", raw)
 
     try:
-        result = json.loads(raw)
+        result: dict[str, Any] = json.loads(raw)
         result["ai_provider"] = "ollama"
         return result
     except json.JSONDecodeError:
@@ -141,4 +144,4 @@ async def get_chat_reply(messages: list, lang: str = "en") -> str:
         response.raise_for_status()
         data = response.json()
 
-    return data["message"]["content"]
+    return str(data["message"]["content"])

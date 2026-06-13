@@ -17,7 +17,9 @@
   gap: 8px;
 }
 
-.navbar-logo { font-size: 20px; }
+.navbar-logo {
+  font-size: 20px;
+}
 
 .navbar-name {
   font-weight: 700;
@@ -80,5 +82,12 @@
   line-height: 1.4;
 }
 
-.lang-btn:hover { background: var(--bg-hover); color: var(--text); }
-.lang-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.lang-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+.lang-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}

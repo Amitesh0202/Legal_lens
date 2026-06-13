@@ -1,8 +1,8 @@
-import { Routes, Route } from 'react-router-dom'
-import Home from './pages/Home.jsx'
-import Results from './pages/Results.jsx'
-import Laws from './pages/Laws.jsx'
-import ChatBot from './components/ChatBot.jsx'
+import { Routes, Route } from "react-router-dom";
+import Home from "./pages/Home.jsx";
+import Results from "./pages/Results.jsx";
+import Laws from "./pages/Laws.jsx";
+import ChatBot from "./components/ChatBot.jsx";
 
 export default function App() {
   return (
@@ -14,5 +14,5 @@ export default function App() {
       </Routes>
       <ChatBot />
     </>
-  )
+  );
 }
